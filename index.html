@@ -1,0 +1,511 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>snvv</title>
+  <meta name="theme-color" content="#fafafa">
+  <style>
+    .card {
+      width: 600px;
+      height: 600px;
+      background-color: rgba(255, 255, 255, 0.5);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.5s ease-in-out;
+      display: none;
+      background-size: cover;
+    }
+
+    .card-content {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      backface-visibility: hidden;
+      transition: width 0.5s ease-in-out;
+    }
+
+    .front {
+      background-image: url('https://i.imgur.com/AKTzP50.jpeg');
+      background-size: cover;
+      transform: rotateY(0deg);
+    }
+
+    .back {
+      background-size: cover;
+      transform: rotateY(-180deg);
+      left: 50%;
+    }
+
+    .back::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.8); /* Màu đục sau hình ảnh */
+    }
+
+    .card.open .front {
+      width: 0;
+    }
+
+    .card.open .back {
+      width: 100%;
+    }
+
+    .card.open {
+      transform: rotateY(-180deg);
+    }
+    #button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: none;
+    }
+
+    #button:hover {
+      background-color: #45a049;
+    }
+    #soundcloud-player *:not(audio) {
+      display: none;
+    }
+    #soundcloud-player {
+      width: 0%;
+      height: 0px;
+    }
+    @import url("https://fonts.googleapis.com/css2?family=Itim&display=swap");
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #f8c8dc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100vh;
+      font-family: "Itim", cursive;
+      z-index: -100;
+    }
+
+    .container {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    @keyframes floating {
+      0% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+      100% {
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes bubble {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+    }
+
+    .btn {
+      display: none;
+      width: 400px;
+      height: 400px;
+      border-radius: 100%;
+      background: rgba(255, 182, 193, 0.8); /* Màu hồng nhạt */
+      z-index: 2;
+      cursor: pointer;
+      transition: 0.4s ease;
+      animation: floating 3s ease-in-out infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      /*background-image: url('https://scontent.fhan2-4.fna.fbcdn.net/v/t1.15752-9/431133994_426722729750303_338535342418592345_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=5f2048&_nc_ohc=OMNDF-27QKYQ7kNvgEK5Nmy&_nc_ht=scontent.fhan2-4.fna&oh=03_Q7cD1QHkZ5ytPOXOVgMgBLH8zELjxfnrvMGK4jTjL60-t1ya6w&oe=667037D7'); /* Thay thế URL_CUA_HINH_NEN bằng URL của hình nền bạn muốn sử dụng */
+      background-size: cover;
+      background-position: center;
+      filter: url("#goo");
+
+    }
+    p {
+      color: #800080; /* Màu tím đậm */
+      font-size: 22px;
+      line-height: 1;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    &:hover {
+      box-shadow: 0px 1px 9px rgba(255, 182, 193, 0.8);
+    }
+
+    &:active {
+      transform: scale(0.9);
+      box-shadow: -2px 2px 23px rgba(255, 182, 193, 0.8);
+    }
+
+    particle {
+      transition: 0.4s ease;
+      animation: floating 3s ease-in-out infinite;
+      position: absolute;
+      background: rgba(255, 182, 193, 0.8); /* Màu hồng nhạt */
+      left: 0;
+      border-radius: 100%;
+      pointer-events: none;
+      top: 0;
+      transform-style: preserve-3d;
+      opacity: 0;
+      z-index: -1;
+      /* background-image: url('https://scontent.fhan2-4.fna.fbcdn.net/v/t1.15752-9/431133994_426722729750303_338535342418592345_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=5f2048&_nc_ohc=OMNDF-27QKYQ7kNvgEK5Nmy&_nc_ht=scontent.fhan2-4.fna&oh=03_Q7cD1QHkZ5ytPOXOVgMgBLH8zELjxfnrvMGK4jTjL60-t1ya6w&oe=667037D7'); /* Thay thế URL_CUA_HINH_NEN bằng URL của hình nền bạn muốn sử dụng */
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+      box-shadow: 0px 1px 9px rgba(255, 182, 193, 0.8); /* Hiệu ứng bóng bóng */
+      animation:  bubble 1s ease-in-out forwards;
+    }
+
+    particle:hover {
+      box-shadow: 0px 1px 9px rgba(255, 182, 193, 0.8); /* Hiệu ứng bóng bóng khi hover */
+    }
+
+    particle:active {
+      transform: scale(0.9);
+      box-shadow: -2px 2px 23px rgba(255, 182, 193, 0.8); /* Hiệu ứng bóng bóng khi active */
+    }
+
+
+    svg {
+      position: absolute;
+      top: -100%;
+      left: -100%;
+    }
+    #uploadForm {
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    label {
+      display: inline-block;
+      background-color: #4CAF50;
+      color: white;
+      padding: 30px 50px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    label:hover {
+      background-color: #45a049;
+    }
+
+    #preview {
+      max-width: 300px;
+      display: none;
+      margin-top: 20px;
+    }
+
+    button {
+      margin-top: 20px;
+      background-color: #008CBA;
+      color: white;
+      padding: 30px 50px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0073e6;
+    }
+
+    .card-content {
+      display: flex; /* Use flexbox */
+      justify-content: center; /* Center horizontally */
+      align-items: center; /* Center vertically */
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      backface-visibility: hidden;
+      transition: width 0.5s ease-in-out;
+    }
+
+    .card-content p {
+      font-family: "Itim", cursive; /* Applying custom font */
+      color: #800080; /* Setting text color to purple */
+      font-size: 24px; /* Adjusting font size */
+      line-height: 1.5; /* Setting line height */
+      text-align: center; /* Centering text horizontally */
+      padding: 20px; /* Adding padding around the text */
+      opacity: 0; /* Initially hide the text */
+      animation: fadeIn 1s ease forwards; /* Add animation effect */
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px); /* Move text up slightly */
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0); /* Move text back to its position */
+      }
+    }
+
+
+  </style>
+</head>
+<body>
+<div style="display: none">
+  <iframe scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/786047401&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
+</div>
+
+  <div class="container">
+    <div class="btn flex justify-center items-center">
+      <p>HERE</p>
+    </div>
+      <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+       <defs>
+        <filter id="goo">
+           <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+           <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+          <feBlend in="SourceGraphic" in2="goo" />
+         </filter>
+        </defs>
+    </svg>
+  </div>
+  <div class="card" onclick="openCard()">
+    <div class="card-content front">
+      <p id="lc"></p>
+      <button id="button">
+        OK
+      </button>>
+    </div>
+    <div class="card-content back">
+
+    </div>
+
+  </div>
+
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
+    <br>
+    <label for="fileInput">Đây là ảnh của Giang</label>
+    <br>
+    <img id="preview" src="#" alt="Preview Image">
+    <br>
+    <button type="button" onclick="useImage()">Oke</button>
+  </form>
+  <script>
+
+    var textDisplayed = false;
+    function openCard() {
+      if (textDisplayed) {
+        var card = document.querySelector('.card');
+        card.classList.toggle('open');
+      }
+
+      // Nếu văn bản chưa được đặt, thực hiện việc đặt văn bản
+      if (!textDisplayed) {
+        var textElement = document.getElementById('lc');
+        // Văn bản cần hiển thị
+        var textToDisplay = "Chúc Giang sinh nhật vui vẻ, hạnh phúc, dồi dào sức khỏe và gặt hái nhiều thành công trong học tập và cuộc sống! \n Mong bạn luôn giữ được tinh thần lạc quan, ham học hỏi và là nguồn cảm hứng cho mọi người xung quanh. \n" +
+          "Chúc bạn có một tuổi mới thật bứt phá và luôn đạt được những mục tiêu mà mình đã đề ra.\n" +
+          "iu b ";
+
+        // Xóa văn bản hiện có trong phần tử p
+        textElement.innerHTML = "";
+
+        // Dùng vòng lặp để đặt văn bản từng ký tự một
+        for (var i = 0; i < textToDisplay.length; i++) {
+          // Tạo một hàm vô danh để bảo vệ giá trị hiện tại của biến i
+          (function (index) {
+            // Gọi hàm setTimeout để thiết lập thời gian trễ giữa việc hiển thị mỗi ký tự
+            setTimeout(function () {
+              // Thêm ký tự vào phần tử p
+              textElement.innerHTML += textToDisplay[index];
+
+              // Nếu đã đặt xong văn bản, thực hiện việc đặt màu nền cho phần tử .front
+              if (index === textToDisplay.length - 1) {
+                setTimeout(function() {
+                  var c = document.querySelector(".front");
+                  c.style.backgroundImage = "none"; // Xóa hình nền
+                  c.style.backgroundColor = "rgba(255,255,255,0.5)"; // Đặt màu nền
+                }, 3000); // Đợi 3 giây sau khi setText xong
+              }
+            }, i * 100); // i * 100 để tăng thời gian trễ lên 100ms cho mỗi ký tự
+          })(i); // Truyền giá trị hiện tại của biến i vào hàm vô danh
+        }
+        textDisplayed = true;
+      }
+    }
+    setTimeout(function () {
+      var textElement = document.getElementById('lc');
+      textElement.innerHTML = ""
+    })
+
+
+
+    function previewImage(event) {
+      var input = event.target;
+      var preview = document.getElementById('preview');
+
+      var reader = new FileReader();
+      reader.onload = function () {
+        preview.src = reader.result;
+        preview.style.display = 'block';
+
+        var particles = document.querySelectorAll('.particle');
+        particles.forEach(function (particle) {
+          particle.style.backgroundImage = "url('" + reader.result + "')";
+        });
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+
+    function useImage() {
+      var preview = document.getElementById('preview');
+      var imageURL = preview.src;
+
+      var btn = document.querySelector('.btn');
+      btn.style.backgroundImage = "url('" + imageURL + "')";
+
+      var uploadForm = document.getElementById("uploadForm");
+      uploadForm.style.display = "none";
+
+      var container = document.querySelector(".container");
+      container.style.display = "flex";
+    }
+    console.clear();
+    let am = 150;
+
+    let btn = document.querySelector(".btn");
+    let book = document.querySelector(".card");
+    let con = document.querySelector(".container");
+
+    btn.addEventListener("mouseup", (e) => {
+      var img = btn.style.backgroundImage;
+      img = img.slice(5, -2);
+
+      let btnEl = btn.getBoundingClientRect();
+      let xCenter = (btnEl.left + btnEl.right) / 2;
+      let yCenter = (btnEl.top + btnEl.bottom) / 2;
+
+      for (let i = 0; i < am; i++) {
+        createCircles(xCenter, yCenter, (btnEl.width - 40) / 2, img);
+      }
+
+      setTimeout(function() {
+        document.body.style.background = "url('https://i.imgur.com/DLntbgs.jpeg') no-repeat center center fixed";
+        document.body.style.backgroundSize = "cover";
+        setTimeout(function() {
+          btn.style.opacity = "0";
+          con.style.height = "0px";
+          con.style.width = "0px";
+
+          setTimeout(function() {
+            btn.style.display = "none";
+            // Fade in the book element
+            setTimeout(function() {
+              book.style.opacity = "1";
+              book.style.display = "flex";
+            }, 10);
+          }, 1500);
+        }, 1500);
+
+      }, 1200);
+    });
+
+    btn.addEventListener("mousedown", () => {
+      let particles = document.querySelectorAll("particle");
+
+      if (particles.length > 0) {
+        particles.forEach((part) => {
+          part.remove();
+        });
+      }
+    });
+
+    function createCircles(x, y, tuSam, img) {
+      let particle = document.createElement("particle");
+      document.body.appendChild(particle);
+
+      let size = 50;
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      particle.style.backgroundImage = `url(${img})`;
+
+      // Tạo vị trí cố định cho bong bóng
+      let fixedX = window.innerWidth / 2; // Vị trí x cố định ở giữa trang web
+      let fixedY = window.innerHeight / 2; // Vị trí y cố định ở giữa trang web
+
+      let destinationX = fixedX + (Math.random() - 0.5) * tuSam * 20;
+      let destinationY = fixedY + (Math.random() - 0.5) * tuSam * 15;
+
+      let animation = particle.animate(
+        [
+          {
+            transform: `translate3d(${x}px, ${y}px, 0)`, // Đặt vị trí ban đầu là vị trí trung tâm của nút
+            opacity: 1
+          },
+          {
+            transform: `translate3d(${destinationX - size / 2}px, ${
+              destinationY - size / 2
+            }px, 0)`,
+            opacity: 1
+          }
+        ],
+        {
+          duration: 400 + Math.random() * 1000,
+          easing: "ease-out",
+          fill: "forwards" // Giữ cho phần tử ở trạng thái cuối cùng của animation
+        }
+      );
+
+      // Thêm class cho bong bóng để có thể dễ dàng thao tác trong tương lai
+      particle.classList.add("floating-particle");
+
+      // Loại bỏ animation khi hoàn thành
+      animation.onfinish = () => {
+        particle.style.animation = "none"; // Loại bỏ animation để giữ phần tử ở vị trí cuối cùng
+      };
+    }
+
+
+  </script>
+</body>
+</html>
